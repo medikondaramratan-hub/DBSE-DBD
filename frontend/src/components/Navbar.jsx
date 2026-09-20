@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const isDemo = localStorage.getItem('demo_mode') === 'true';
 
   return (
     <header className="topbar">
@@ -18,6 +19,26 @@ export default function Navbar() {
       </div>
 
       <div className="topbar-right">
+        {isDemo && (
+          <span
+            style={{
+              padding: '0.25rem 0.65rem',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              background: '#FEF3C7',
+              color: '#92400E',
+              border: '1px solid #FCD34D',
+              marginRight: '0.75rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+            title="Interactive client-side simulation"
+          >
+            ⚡ Offline Preview
+          </span>
+        )}
         {user ? (
           <div className="user-profile-menu">
             <div className="user-meta">

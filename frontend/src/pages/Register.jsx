@@ -51,6 +51,21 @@ export default function Register() {
     }
   };
 
+  const handleDemoLogin = () => {
+    localStorage.setItem('demo_mode', 'true');
+    const demoUser = {
+      userId: 1,
+      name: name.trim() || 'Ram Ratan',
+      email: email.trim() || 'student@college.edu',
+      role: 'STUDENT',
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem('token', 'mock-jwt-token-demo');
+    localStorage.setItem('user', JSON.stringify(demoUser));
+    navigate('/dashboard');
+    window.location.reload();
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-card card">
@@ -63,9 +78,27 @@ export default function Register() {
         </div>
 
         {error && (
-          <div className="auth-error-banner" role="alert">
-            <AlertCircle size={18} className="flex-shrink-0" />
-            <span>{error}</span>
+          <div className="auth-error-banner" role="alert" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertCircle size={18} className="flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#4F46E5',
+                textDecoration: 'underline',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: 0,
+                fontSize: '0.875rem'
+              }}
+            >
+              👉 Click here to test in Interactive Demo Mode
+            </button>
           </div>
         )}
 
@@ -141,6 +174,26 @@ export default function Register() {
           >
             <span>{loading ? 'Creating Student Account...' : 'Register & Start Learning'}</span>
             <ArrowRight size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            className="btn btn-secondary btn-submit"
+            style={{
+              marginTop: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              background: '#F0FDF4',
+              color: '#166534',
+              borderColor: '#BBF7D0',
+              fontWeight: 600
+            }}
+          >
+            <Sparkles size={18} />
+            <span>⚡ Try Demo Mode (Instant Access)</span>
           </button>
         </form>
 
