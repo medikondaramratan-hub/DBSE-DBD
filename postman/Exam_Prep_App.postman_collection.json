@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "Exam Preparation App With Adaptive Quizzes",
+    "_postman_id": "966f6ca4-b4cb-4fa6-831a-f2056b10982b",
+    "description": "API collection for Project Review-3 demonstrating authentication, curriculum navigation, adaptive quiz lifecycle, and learning analytics.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attemptId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "currentQuestionId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chandrakanth\",\n  \"email\": \"student@examapp.com\",\n  \"password\": \"Student@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login Student (Saves JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('JWT Token saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@examapp.com\",\n  \"password\": \"Student@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Authenticated Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Curriculum (Subjects & Topics)",
+      "item": [
+        {
+          "name": "Get All Subjects",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects"]
+            }
+          }
+        },
+        {
+          "name": "Get Subject by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/subjects/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Topics for Subject",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/subjects/1/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", "1", "topics"]
+            }
+          }
+        },
+        {
+          "name": "Get Topic by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/topics/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Adaptive Quiz Engine",
+      "item": [
+        {
+          "name": "Start Adaptive Quiz",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.attemptId) {",
+                  "    pm.collectionVariables.set('attemptId', jsonData.attemptId);",
+                  "}",
+                  "if (jsonData.firstQuestion) {",
+                  "    pm.collectionVariables.set('currentQuestionId', jsonData.firstQuestion.questionId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topicId\": 1,\n  \"totalQuestions\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "start"]
+            }
+          }
+        },
+        {
+          "name": "Get Next Adaptive Question",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/{{attemptId}}/next-question",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "{{attemptId}}", "next-question"]
+            }
+          }
+        },
+        {
+          "name": "Submit Answer (Adaptive Evaluation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": {{currentQuestionId}},\n  \"selectedAnswer\": \"B\",\n  \"responseTime\": 22\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/{{attemptId}}/answer",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "{{attemptId}}", "answer"]
+            }
+          }
+        },
+        {
+          "name": "Finish Quiz Attempt",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/{{attemptId}}/finish",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "{{attemptId}}", "finish"]
+            }
+          }
+        },
+        {
+          "name": "Get Quiz Result & Solutions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/{{attemptId}}/result",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "{{attemptId}}", "result"]
+            }
+          }
+        },
+        {
+          "name": "Get Student Quiz History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "history"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Performance & Learning Analytics",
+      "item": [
+        {
+          "name": "Get Overall Performance Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/performance/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["performance", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Topic-wise Mastery List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/performance/me/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["performance", "me", "topics"]
+            }
+          }
+        },
+        {
+          "name": "Get Smart Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/performance/me/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["performance", "me", "recommendations"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
